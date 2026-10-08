@@ -1,0 +1,157 @@
+{
+  "project_name": "CollegePredict AI",
+  "tagline": "Your AI-powered path to the right college.",
+  "theme": "Light",
+  "archetype": "ARCHETYPE 3 / 4 Hybrid - Modern Premium EdTech",
+  "instructions_to_main_agent": "Use React js (.js / .jsx files). Build an exceptionally sleek, high-trust Indian EdTech application for 'CollegePredict AI'. Adhere strictly to the color palette, typography, grid strategies, data-testid attributes, and interactive layout specs defined here. Avoid dark gradients or generic dark mode slop; keep backgrounds crisp light grey (#FAFAFC / #F8FAFC) with pure white (#FFFFFF) elevated surface cards, sharp borders (#E2E8F0), deep navy slate headings (#0F172A), and vibrant indigo accent (#4F46E5 / #6366F1). Ensure every page and component has data-testid attributes on key interactive and status elements.",
+  "UNIVERSAL GUIDELINES FOR MAIN AGENT": [
+    "You tend to converge toward generic, 'on distribution' outputs. In frontend design, this creates what users call the 'AI slop' aesthetic. Avoid this: make creative, distinctive frontends that surprise and delight.",
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients.",
+    "Don't make generic centered layouts, simplistic gradients, and uniform styling.",
+    "Create depth through layered design elements with z-index hierarchy.",
+    "Use glass-morphism effects with backdrop filters (12-24px blur) for sticky navbars, modal overlays, and floating notification badges.",
+    "You MUST NOT apply universal transition (e.g., transition: all). This breaks transforms. Always add specific transitions for hover/focus states like transition-colors or transition-transform.",
+    "You MUST NOT center align the app container (.App { text-align: center; }). Preserve natural left-to-right reading flow.",
+    "Always use modern button styles: pill-shaped or rounded-xl buttons with subtle hover lift (-translate-y-0.5) and focus rings.",
+    "NEVER use AI assistant Emoji characters like 🤖, 🧠, 💭, 💡, 🔮, 🎯 as icon assets. Use Lucide icons or dedicated React Icon packages.",
+    "Every interaction needs micro-animations - hover states, smooth transitions, tab underline slates, and staggered entrance animations.",
+    "Use generous spacing: p-6, p-8, gap-6, py-12 to py-20 for landing sections. Cramped designs look cheap.",
+    "Subtle grain/grid overlays, crisp border strokes (border border-slate-200), selection badges, and pulse indicators make the experience feel premium.",
+    "All interactive elements and critical state displays MUST include data-testid attributes (e.g. data-testid='predict-colleges-btn', data-testid='counselor-chat-input')."
+  ],
+  "typography": {
+    "font_family_heading": "'Plus Jakarta Sans', 'Outfit', 'Satoshi', sans-serif",
+    "font_family_body": "'Inter', 'DM Sans', system-ui, sans-serif",
+    "font_family_mono": "'JetBrains Mono', 'Fira Code', monospace",
+    "hierarchy": {
+      "h1_hero": "text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.15]",
+      "h2_section": "text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900",
+      "h3_card_header": "text-xl sm:text-2xl font-semibold text-slate-900",
+      "h4_sub_header": "text-lg font-medium text-slate-800",
+      "body_lead": "text-lg text-slate-600 font-normal leading-relaxed",
+      "body_regular": "text-base text-slate-600 leading-normal",
+      "body_small": "text-sm text-slate-500",
+      "caption_label": "text-xs uppercase font-semibold tracking-wider text-slate-400"
+    }
+  },
+  "colors": {
+    "background_main": "#FAFAFC",
+    "background_card": "#FFFFFF",
+    "background_subtle": "#F1F5F9",
+    "text_primary": "#0F172A",
+    "text_secondary": "#475569",
+    "text_muted": "#94A3B8",
+    "border_default": "#E2E8F0",
+    "border_focus": "#6366F1",
+    "primary_accent": "#4F46E5",
+    "primary_hover": "#4338CA",
+    "primary_light": "#EEF2FF",
+    "primary_gradient_pill": "from-indigo-600 to-violet-600",
+    "prediction_categories": {
+      "safe": {
+        "text": "#059669",
+        "badge_bg": "#ECFDF5",
+        "border": "#A7F3D0",
+        "accent": "#10B981"
+      },
+      "target": {
+        "text": "#D97706",
+        "badge_bg": "#FFFBEB",
+        "border": "#FDE68A",
+        "accent": "#F59E0B"
+      },
+      "dream": {
+        "text": "#4F46E5",
+        "badge_bg": "#EEF2FF",
+        "border": "#C7D2FE",
+        "accent": "#6366F1"
+      },
+      "warning": {
+        "text": "#DC2626",
+        "badge_bg": "#FEF2F2",
+        "border": "#FECACA",
+        "accent": "#EF4444"
+      }
+    }
+  },
+  "layout_architecture": {
+    "navigation": {
+      "desktop_sidebar": "Sticky side navigation on desktop with logo, user profile snippet, menu items with active state pill, and quick counselor trigger.",
+      "mobile_bottom_bar": "Fixed bottom navigation bar on mobile with icons + labels: Home | Predict | Colleges | AI | Profile.",
+      "header_top": "Top search bar with exam fast-filters, notification bell icon, and dark/light toggle if enabled."
+    },
+    "grids": {
+      "hero_bento": "grid grid-cols-1 lg:grid-cols-12 gap-8 items-center",
+      "dashboard_grid": "grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6",
+      "predictions_grid": "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6",
+      "comparison_matrix": "grid grid-cols-2 md:grid-cols-4 gap-4"
+    }
+  },
+  "key_components": [
+    {
+      "component_name": "Landing Hero",
+      "description": "Bold headline 'Which colleges can you get into?' with subhead, dual CTAs ('Predict My Colleges' primary, 'Talk to AI Counselor' outline secondary), live rank/percentile quick-search box, and interactive mini prediction dashboard visual."
+    },
+    {
+      "component_name": "Onboarding Wizard",
+      "description": "5-step wizard with visual progress bar: Step 1: Academic (10th/12th marks, stream) -> Step 2: Exam (JEE Main/Advanced, NEET, MHT-CET, WBJEE, Rank/Percentile, Category, State) -> Step 3: Preferences (Preferred States, Branch/Stream, Budget, College Type) -> Step 4: Goals (Placement priority, Research, Higher studies) -> Step 5: Results preview."
+    },
+    {
+      "component_name": "Student Dashboard",
+      "description": "Greeting 'Good morning, [Name]', Admission Readiness score circular gauge (e.g. 88%), My Predictions summary widgets (Dream: 4, Target: 12, Safe: 18), Upcoming Cutoff/Form Deadlines ticker, Recommended Colleges carousel, and AI Counselor Quick Advice widget."
+    },
+    {
+      "component_name": "Prediction Results Grid",
+      "description": "Categorized tabs (All | Dream | Target | Safe) with college cards displaying logo, college name, NIRF rank, calculated probability badge (e.g., 85% Safe), round-wise cutoff comparison, annual fee, average placement package, and 'Shortlist' star action."
+    },
+    {
+      "component_name": "College Explorer & Filters",
+      "description": "Facet sidebar filter by State, Exam Accepted, Fee Range, NIRF Rank, Facilities, Placement Avg, with search query bar and sort dropdown."
+    },
+    {
+      "component_name": "College Profile Tabs",
+      "description": "Detailed view for /college/:slug with sticky sub-tabs: Overview, Cutoffs (historical chart), Fees & Scholarships, Placements, Infrastructure, Reviews, and Admission Eligibility Predictor."
+    },
+    {
+      "component_name": "Compare Tool",
+      "description": "Up to 4 colleges matrix comparison with highlight differences switch, parameter rating bars (Fees, Placements, Infrastructure, Faculty), and an AI Summary recommendation box at the top."
+    },
+    {
+      "component_name": "AI Counselor Chat UI",
+      "description": "Modern full-page conversational interface with prompt suggestions ('What branch can I get at NIT Trichy with rank 12000?', 'Show me top CSE colleges under 8 Lakhs fee'), real-time streaming response layout, inline rendered College Cards, and downloadable counseling summary."
+    },
+    {
+      "component_name": "Shortlist Drag & Drop Board",
+      "description": "Interactive Kanban or drag-and-drop lists with 3 columns: Dream, Target, Safe. Allows drag between tiers, note adding, and deadline reminder alerts."
+    },
+    {
+      "component_name": "Admission Tracker & Fee/ROI Calculators",
+      "description": "Interactive timelines for joSAA/CSAB/State counseling rounds, ROI calculator slider (Total Fee vs Expected Avg Package), and scholarship finder."
+    },
+    {
+      "component_name": "Admin Dashboard",
+      "description": "Analytics over prediction searches, popular colleges queried, cutoff data uploader tool, user management table, and AI prompt template settings."
+    }
+  ],
+  "image_urls": {
+    "hero_campus_1": "https://images.unsplash.com/photo-1680084521847-0e42cc80a5ee?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "hero_campus_2": "https://images.unsplash.com/photo-1687709348710-05314eea5476?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "students_study": "https://images.unsplash.com/photo-1680084521738-87a53d7a50d8?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "campus_building": "https://images.unsplash.com/photo-1695722099520-564bb36a3a6b?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "graduates_celebration": "https://images.unsplash.com/photo-1790339613413-4908b5e9faff?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "graduation_caps": "https://images.unsplash.com/photo-1775623606597-9f677b8e1510?crop=entropy&cs=srgb&fm=jpg&q=85"
+  },
+  "testing_and_accessibility": {
+    "data_testid_policy": "All buttons, inputs, tabs, cards, dropdowns, links, modals, user metrics, and navigation links MUST carry kebab-case data-testid attributes.",
+    "examples": [
+      "data-testid='hero-predict-btn'",
+      "data-testid='hero-counselor-btn'",
+      "data-testid='hero-search-input'",
+      "data-testid='onboarding-next-btn'",
+      "data-testid='prediction-card-dream'",
+      "data-testid='college-compare-btn'",
+      "data-testid='counselor-message-send-btn'",
+      "data-testid='bottom-nav-predict'"
+    ]
+  }
+}

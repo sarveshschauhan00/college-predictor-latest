@@ -1,0 +1,48 @@
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { Plus, Trash2, Upload, Pencil, X } from "lucide-react";
+import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { api } from "@/lib/api";
+import { PageHeader, Stat } from "@/components/ui-bits";
+
+const SECTIONS = ["Dashboard", "Students", "Colleges", "Courses", "Exams", "Cutoffs", "Scholarships", "Deadlines", "AI Knowledge", "Analytics"];
+const COLL = { Colleges: "colleges", Courses: "courses", Exams: "exams", Cutoffs: "cutoffs", Scholarships: "scholarships", Deadlines: "deadlines", "AI Knowledge": "knowledge" };
+const COLS = { colleges: ["id", "name", "city", "state", "type", "nirf_rank", "fee_annual", "avg_package"], courses: ["id", "name", "stream", "degree", "avg_salary_lpa"], exams: ["id", "name", "metric_type", "total_candidates", "conducting_body"], cutoffs: ["exam_id", "college_id", "course_id", "category", "quota", "year", "round", "closing"], scholarships: ["name", "provider", "amount", "deadline", "status"], deadlines: ["title", "exam_id", "date", "kind"], knowledge: ["title", "content"] };
+
+function Crud({ coll }) {
+  const [data, setData] = useState(null); const [edit, setEdit] = useState(null); const [json, setJson] = useState(""); const [q, setQ] = useState("");
+  const load = () => api.get(`/admin/${coll}`).then((r) => setData(r.data));
+  useEffect(() => { setData(null); setEdit(null); load(); }, [coll]); // eslint-disable-line
+  const open = (item) => { setEdit(item || {}); setJson(JSON.stringify(item || Object.fromEntries(COLS[coll].map((c) => [c, ""])), null, 2)); };
+  const save = async () => { try { const body = JSON.parse(json); if (edit.id) await api.put(`/admin/${coll}/${edit.id}`, body); else await api.post(`/admin/${coll}`, body); toast.success("Saved"); setEdit(null); load(); } catch (e) { toast.error(e.response?.data?.detail || e.message); } };
+  const del = async (item) => { if (!window.confirm("Delete this record?")) return; await api.delete(`/admin/${coll}/${item.id}`); load(); };
+  const importCsv = async (file) => { const fd = new FormData(); fd.append("file", file); try { const { data: r } = await api.post("/admin/cutoffs/import", fd); toast.success(`Imported ${r.imported} cutoffs${r.error_count ? ` · ${r.error_count} rows skipped` : ""}`); if (r.errors?.length) console.warn(r.errors); load(); } catch (e) { toast.error(e.response?.data?.detail || "Import failed"); } };
+  const items = data?.items.filter((i) => !q || JSON.stringify(i).toLowerCase().includes(q.toLowerCase())).slice(0, 200) || [];
+  return (
+    <div className="card-soft p-5 fade-up">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4"><input value={q} onChange={(e) => setQ(e.target.value)} placeholder={`Filter ${coll}…`} className="input-soft sm:max-w-xs" data-testid="admin-filter-input" /><span className="text-xs text-slate-500">{data ? `${data.total} records` : "Loading…"}</span><div className="ml-auto flex gap-2">{coll === "cutoffs" && <label className="btn-outline cursor-pointer" data-testid="admin-import-csv-btn"><Upload size={15} />Import CSV<input type="file" accept=".csv" className="hidden" onChange={(e) => e.target.files[0] && importCsv(e.target.files[0])} /></label>}<button onClick={() => open(null)} className="btn-primary" data-testid="admin-add-btn"><Plus size={15} />Add</button></div></div>
+      {coll === "cutoffs" && <p className="text-xs text-slate-500 mb-3">CSV columns: exam_id, college_id, course_id, category, year, closing (optional: opening, round, quota, gender, metric). Use college/course slugs as IDs.</p>}
+      {edit && <div className="mb-4 rounded-xl border border-indigo-200 bg-indigo-50/40 p-4 fade-up" data-testid="admin-edit-panel"><div className="flex items-center justify-between mb-2"><p className="font-semibold text-sm">{edit.id ? `Edit ${edit.id}` : "New record"} (JSON)</p><button onClick={() => setEdit(null)}><X size={16} /></button></div><textarea value={json} onChange={(e) => setJson(e.target.value)} rows={12} className="input-soft font-mono !text-xs" data-testid="admin-json-editor" /><button onClick={save} className="btn-primary mt-3" data-testid="admin-save-btn">Save</button></div>}
+      <div className="overflow-x-auto"><table className="w-full text-xs"><thead><tr className="bg-slate-50 text-left uppercase tracking-wider text-slate-500">{COLS[coll].map((c) => <th key={c} className="p-2">{c}</th>)}<th className="p-2" /></tr></thead><tbody>{items.map((i) => <tr key={i.id} className="border-t border-slate-100 hover:bg-slate-50" data-testid="admin-row">{COLS[coll].map((c) => <td key={c} className="p-2 max-w-[220px] truncate">{String(i[c] ?? "")}</td>)}<td className="p-2 whitespace-nowrap"><button onClick={() => open(i)} className="text-slate-500 hover:text-indigo-700 mr-2" data-testid={`admin-edit-${i.id}`}><Pencil size={14} /></button><button onClick={() => del(i)} className="text-slate-400 hover:text-red-600" data-testid={`admin-delete-${i.id}`}><Trash2 size={14} /></button></td></tr>)}</tbody></table></div>
+    </div>
+  );
+}
+
+export default function Admin() {
+  const [sec, setSec] = useState("Dashboard"); const [kpi, setKpi] = useState(null); const [an, setAn] = useState(null); const [students, setStudents] = useState(null);
+  useEffect(() => { api.get("/admin/kpis").then((r) => setKpi(r.data)); api.get("/admin/analytics").then((r) => setAn(r.data)); api.get("/admin/students").then((r) => setStudents(r.data)); }, []);
+  return (
+    <div>
+      <PageHeader eyebrow="Admin" title="Platform administration" subtitle="Manage data, students, cutoffs and analytics." />
+      <div className="flex gap-2 overflow-x-auto hide-scroll mb-6">{SECTIONS.map((s) => <button key={s} onClick={() => setSec(s)} className={`chip whitespace-nowrap ${sec === s ? "chip-on" : "chip-off"}`} data-testid={`admin-tab-${s.toLowerCase().replace(/\s+/g, "-")}`}>{s}</button>)}</div>
+      {sec === "Dashboard" && (kpi ? <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 fade-up" data-testid="admin-kpis">{[["Students", kpi.students], ["Active users", kpi.active_users], ["Predictions", kpi.predictions], ["AI conversations", kpi.ai_conversations], ["College searches", kpi.college_searches], ["Applications tracked", kpi.applications_tracked], ["Colleges", kpi.colleges], ["Cutoff records", kpi.cutoffs], ["Scholarships", kpi.scholarships]].map(([l, v]) => <Stat key={l} label={l} value={v} testId={`kpi-${l.toLowerCase().replace(/\s+/g, "-")}`} />)}</div> : <div className="skeleton h-40" />)}
+      {sec === "Students" && (students ? <div className="card-soft overflow-x-auto fade-up"><table className="w-full text-sm"><thead><tr className="bg-slate-50 text-left text-xs uppercase tracking-wider text-slate-500"><th className="p-3">Name</th><th className="p-3">Email</th><th className="p-3">Provider</th><th className="p-3">Exam</th><th className="p-3">Score</th><th className="p-3">Onboarded</th><th className="p-3" /></tr></thead><tbody>{students.map((s) => <tr key={s.user_id} className="border-t border-slate-100" data-testid={`admin-student-${s.user_id}`}><td className="p-3 font-semibold">{s.name}</td><td className="p-3">{s.email}</td><td className="p-3 capitalize">{s.provider}</td><td className="p-3 uppercase">{s.profile?.exam_id || "—"}</td><td className="p-3 font-mono">{s.profile?.percentile ?? s.profile?.rank ?? s.profile?.score ?? "—"}</td><td className="p-3">{s.onboarded ? "Yes" : "No"}</td><td className="p-3"><button onClick={async () => { if (window.confirm("Delete this student and all their data?")) { await api.delete(`/admin/students/${s.user_id}`); setStudents(students.filter((x) => x.user_id !== s.user_id)); } }} className="text-slate-400 hover:text-red-600"><Trash2 size={14} /></button></td></tr>)}</tbody></table></div> : <div className="skeleton h-40" />)}
+      {COLL[sec] && <Crud coll={COLL[sec]} />}
+      {sec === "Analytics" && (an ? <div className="grid lg:grid-cols-2 gap-4 fade-up" data-testid="admin-analytics">
+        <div className="card-soft p-5"><h3 className="font-display font-bold mb-3">Event volume</h3><div className="h-64"><ResponsiveContainer><BarChart data={an.events}><XAxis dataKey="event" tick={{ fontSize: 10 }} interval={0} angle={-25} textAnchor="end" height={70} /><YAxis tick={{ fontSize: 10 }} /><Tooltip /><Bar dataKey="count" fill="#4F46E5" radius={[6, 6, 0, 0]} /></BarChart></ResponsiveContainer></div></div>
+        <div className="card-soft p-5"><h3 className="font-display font-bold mb-3">Conversion funnel</h3><ul className="space-y-2">{an.funnel.map((f, i) => { const max = Math.max(1, ...an.funnel.map((x) => x.count)); return <li key={f.step}><div className="flex justify-between text-xs mb-1"><span className="capitalize">{f.step.replace(/_/g, " ")}</span><span className="font-mono">{f.count}</span></div><div className="h-2 rounded-full bg-slate-100"><div className="h-full rounded-full bg-indigo-600" style={{ width: `${(f.count / max) * 100}%` }} /></div></li>; })}</ul></div>
+        {[["Most viewed colleges", an.top_colleges], ["Most viewed courses", an.top_courses], ["Most common exams (predictions)", an.top_exams], ["Recent AI questions", an.recent_questions]].map(([t, arr]) => <div key={t} className="card-soft p-5"><h3 className="font-display font-bold mb-3">{t}</h3>{arr.length === 0 ? <p className="text-sm text-slate-500">No data yet.</p> : <ul className="space-y-1.5 text-sm">{arr.map((x, i) => <li key={i} className="flex justify-between gap-3"><span className="truncate">{x.label}</span><span className="font-mono text-slate-500">{x.count}</span></li>)}</ul>}</div>)}
+      </div> : <div className="skeleton h-40" />)}
+    </div>
+  );
+}
