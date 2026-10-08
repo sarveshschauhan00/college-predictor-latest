@@ -1,0 +1,42 @@
+{
+  "summary": "First end-to-end test iteration for CollegePredict AI (React + FastAPI + MongoDB). Created pytest regression suite covering 40 backend tests across health, auth, predictor, catalog, student (CRUD), AI (SSE chat + compare-summary + cutoff-insight) and admin (KPIs, CSV cutoffs import, knowledge CRUD, RBAC). All 40 backend tests pass (100%). Smoke-tested frontend flows: landing hero -> /predictor guest flow -> /predictions (33 colleges, buckets rendered), login as student -> /dashboard (readiness 83%, predictions 6/6/28, deadlines, recommended), /ai-counselor streaming SSE with 812-char assistant reply plus NIT Trichy card, /colleges search ('IIT' -> 8 cards), /shortlist shows 4 saved colleges in dream/target/safe columns, admin login -> /admin KPIs (40 colleges, 8056 cutoffs, 12 scholarships), /cutoffs chart renders, /compare page loads, catalog pages (/scholarships, /fees, /roi, /courses, /tracker) all load. Only non-blocking frontend issue: a React hydration warning on the Calculators (/fees, /roi) 'years' <select> originating from the Emergent visual-editor overlay wrapping <option> children with <span>; it does not break functionality.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/fees and /roi (Calculators.jsx line 22 years <select>)", "issues": ["React console warning: 'In HTML, <span> cannot be a child of <option>. This will cause a hydration error.' Root cause: Emergent visual-editor overlay injects <span data-ve-dynamic> into <option> for the inline-mapped years array. Suppressable by lifting the year options out of inline .map or disabling the visual-editor instrumentation for option elements. Functional behaviour unaffected."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "(Low) Fix hydration warning on Calculators 'years' select — currently non-blocking, caused by inline array mapping inside <select><option>."
+  ],
+  "critical_code_review_comments": [
+    "server.py: CORSMiddleware is added AFTER app.include_router — in Starlette, middleware added after routes still applies to all requests, so OK, but convention is to add before include_router.",
+    "routes_student.py get_profile returns stub when no profile exists which is fine; however shortlist() re-runs full prediction (potentially expensive) on every GET /api/shortlist request — consider caching per user.",
+    "routes_ai.py in-memory rate limiter (_rate dict) is per-process; will reset on restart and won't work across workers — acceptable for demo.",
+    "routes_admin.py update_item/delete_item accept any dict with no Pydantic validation and allow updating id — low risk since admin-only, but worth hardening.",
+    "predictor.run_prediction is called from /dashboard, /predictions/mine, /shortlist — fetches up to 20k cutoffs each time; consider memoising or adding an index on (exam_id, category).",
+    "auth.py uses bcrypt synchronously inside async handlers (hash_pw/check_pw) — acceptable at low scale, but will block event loop under load. Consider asyncio.to_thread.",
+    "email_service for demo.com domain is expected to fail per task notes — endpoint handles errors cleanly."
+  ],
+  "updated_files": [
+    "/app/backend/tests/__init__.py (new)",
+    "/app/backend/tests/backend_test.py (new regression suite, 40 tests)",
+    "/app/test_reports/iteration_1.json (new)"
+  ],
+  "success_rate": {"backend": "100% (40/40)", "frontend": "~100% (all tested routes render; one non-blocking React warning)"},
+  "test_credentials": "Student: student@demo.com / Student@123 ; Admin: admin@collegepredict.ai / Admin@123 (confirmed from /app/memory/test_credentials.md; both work)",
+  "seed_data_creation": "No new seed data. Admin cutoffs CSV import test adds 1 cutoff row for jee-main/dtu/CSE 2024 round 6; shortlist test adds + removes an entry; application test adds + removes an entry. Registered one disposable test user (test_<uuid>@example.com) which stays in DB.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend regression suite at /app/backend/tests/backend_test.py runs in ~27s with pytest-xdist (2 workers). All tests use BASE_URL from REACT_APP_BACKEND_URL env. The AI endpoints (TestAI) hit the real GPT model and consume ~2 rate-limit tokens per run; avoid running back-to-back more than 20 times/hour. Email digest test accepts 200/400/502 because demo.com is a sink. If re-seeding wipes users, run backend restart to re-seed admin & demo student.",
+  "rca of the issue": "N/A — no critical issues found. The only noticed warning is a React 'hydration' console warning on Calculators pages caused by visual-editor overlay instrumentation wrapping dynamic <option> children, not an app bug."
+}

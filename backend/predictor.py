@@ -88,7 +88,7 @@ async def run_prediction(exam_id: str, *, rank=None, percentile=None, score=None
         if not col:
             continue
         quota = c.get("quota", "AI")
-        if quota == "HS" and home_state and col.get("state") != home_state:
+        if quota == "HS" and (not home_state or col.get("state") != home_state):
             continue
         g = c.get("gender", "all")
         if g == "female" and gender != "Female":
